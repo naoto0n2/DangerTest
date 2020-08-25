@@ -11,18 +11,20 @@ git.diff.each do |file|
   end
 end
 
-# Include merge commit
-if git.commits.any? { |c| c.message =~ /^Merge branch 'master'/ }
-  fail 'Please rebase to get rid of the merge commits in this PR'
-end
+git.commits.each do |c|
+  # Skip merge commit
+  next if c.message.start_with?('Merge pull request')
 
-# Commit message does not start with commit mark
-if git.commits.any? { |c| c.message =~ /^(?!(:.*:|Revert)).*$/ }
-  message c.message
-  fail 'Commit message does not start with commit mark'
-end
+  # Skip revert commit
+  next if c.message/start_with?('Revert')
 
-# Include review commit
-if git.commits.any? { |c| c.message =~ /\[([sS]elf )?[rR]eview\]/ }
-  fail 'Include review commit'
+  # Include merge commit
+  if c.message =~ /^Merge branch 'master'/
+    fail 'Please rebase to get rid of the merge commits in this PR'
+  end
+
+  # Commit message does not start with commit mark
+  if c.message =~ /^(?!:.*:).*$/
+    fail 'Commit message does not start with commit mark'
+  end
 end
