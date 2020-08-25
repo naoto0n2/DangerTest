@@ -1,13 +1,33 @@
-# Sometimes it's a README fix, or something like that - which isn't relevant for
-# including in a project's CHANGELOG for example
-declared_trivial = github.pr_title.include? "#trivial"
+# Include specific word in xib/storyboard
+fail_texts = [
+  "misplaced=\"YES\"", 
+  "calibratedRGB"
+]
+git.diff.each do |file|
+  unless file.path.match(/Dangerfile/)
+    fail_texts.map do |fail_text|
+      fail "Include `#{fail_text}` in #{file.path}" if /^\+.*#{fail_text}/.match(file.patch)
+    end
+  end
+end
 
-# Make it more obvious that a PR is a work in progress and shouldn't be merged yet
-warn("PR is classed as Work in Progress") if github.pr_title.include? "[WIP]"
+# Check commit message
+git.commits.each do |c|
+  # Skip merge commit
+  next if c.message.start_with?('Merge pull request')
 
-# Warn when there is a big PR
-warn("Big PR") if git.lines_of_code > 500
+  # Skip revert commit
+  next if c.message.start_with?('Revert')
 
-# Don't let testing shortcuts get into master by accident
-fail("fdescribe left in tests") if `grep -r fdescribe specs/ `.length > 1
-fail("fit left in tests") if `grep -r fit specs/ `.length > 1
+  # Include merge commit
+  if c.message.start_with?("Merge branch 'master'")
+    fail 'Please rebase to get rid of the merge commits in this PR'
+    next
+  end
+
+  # Commit message does not start with commit mark
+  if c.message =~ /^(?!:.*:).*$/
+    fail 'Commit message does not start with commit mark'
+    next
+  end
+end
