@@ -16,7 +16,7 @@ git.commits.each do |c|
   next if c.message.start_with?('Merge pull request')
 
   # Skip revert commit
-  next if c.message/start_with?('Revert')
+  next if c.message.start_with?('Revert')
 
   # Include merge commit
   if c.message =~ /^Merge branch 'master'/
