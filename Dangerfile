@@ -11,6 +11,7 @@ git.diff.each do |file|
   end
 end
 
+# Check commit message
 git.commits.each do |c|
   # Skip merge commit
   next if c.message.start_with?('Merge pull request')
@@ -21,10 +22,12 @@ git.commits.each do |c|
   # Include merge commit
   if c.message =~ /^Merge branch 'master'/
     fail 'Please rebase to get rid of the merge commits in this PR'
+    next
   end
 
   # Commit message does not start with commit mark
   if c.message =~ /^(?!:.*:).*$/
     fail 'Commit message does not start with commit mark'
+    next
   end
 end
