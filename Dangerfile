@@ -18,7 +18,7 @@ end
 
 # Commit message does not start with commit mark
 if git.commits.any? { |c| c.message =~ /^(?!(:.*:|Revert)).*$/ }
-  puts c.message
+  message c.message
   fail 'Commit message does not start with commit mark'
 end
 
