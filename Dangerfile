@@ -20,7 +20,7 @@ git.commits.each do |c|
   next if c.message.start_with?('Revert')
 
   # Include merge commit
-  if c.message =~ /^Merge branch 'master'/
+  if c.message.start_with?("Merge branch 'master'")
     fail 'Please rebase to get rid of the merge commits in this PR'
     next
   end
